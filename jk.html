@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚡ NIKE SHOP</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- EmailJS SDK -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <style>
+        body { background-color: #0d0d0d; color: #ffffff; font-family: 'Pretendard', system-ui, sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .hidden-tab { display: none; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+    <!-- 상단 네비게이션 -->
+    <header class="border-b border-gray-800 bg-black/50 sticky top-0 z-50 backdrop-blur-md">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-extrabold tracking-wider text-yellow-400 flex items-center gap-2">
+                ⚡ NIKE SHOP
+            </h1>
+            <div class="flex items-center gap-3">
+                <span id="userGreeting" class="text-sm text-gray-300 hidden"></span>
+                <button onclick="openAdminModal()" class="text-xs bg-red-900/40 hover:bg-red-800/60 border border-red-700/50 text-red-300 px-3 py-1.5 rounded-lg transition">
+                    🔑 관리자
+                </button>
+                <button id="authBtn" onclick="handleAuthAction()" class="bg-yellow-400 hover:bg-yellow-300 text-black font-bold px-4 py-1.5 rounded-lg text-sm transition">
+                    로그인 / 회원가입
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 메인 컨테이너 -->
+    <main class="max-w-6xl mx-auto px-4 py-8 w-full flex-grow">
+        
+        <!-- 대시보드 (잔액 / 메인 메뉴) -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <!-- 프로필 & 잔액 카드 -->
+            <div class="glass p-6 rounded-2xl flex flex-col justify-between">
+                <div>
+                    <h2 class="text-gray-400 text-sm font-semibold mb-1">내 계정 정보</h2>
+                    <p id="dashUsername" class="text-xl font-bold text-white mb-4">로그인이 필요합니다</p>
+                </div>
+                <div>
+                    <span class="text-xs text-gray-400">보유 잔액</span>
+                    <div class="text-3xl font-black text-yellow-400 mt-1"><span id="userBalance">0</span> 원</div>
+                </div>
+            </div>
+
+            <!-- 네비게이션 탭 버튼 -->
+            <div class="glass p-6 rounded-2xl md:col-span-2 flex flex-col justify-center">
+                <h2 class="text-gray-400 text-sm font-semibold mb-3">메뉴 선택</h2>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <button onclick="switchTab('shop')" class="tab-btn bg-yellow-400 text-black font-bold py-3 rounded-xl transition shadow-lg">👟 상품 구매</button>
+                    <button onclick="switchTab('charge')" class="tab-btn bg-gray-800 hover:bg-gray-700 text-white font-bold py-3 rounded-xl transition">💳 금액 충전</button>
+                    <button onclick="switchTab('chargeHistory')" class="tab-btn bg-gray-800 hover:bg-gray-700 text-white font-bold py-3 rounded-xl transition">📋 충전 내역</button>
+                    <button onclick="switchTab('buyHistory')" class="tab-btn bg-gray-800 hover:bg-gray-700 text-white font-bold py-3 rounded-xl transition">📦 구매 내역</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 탭 1: 상품 구매 -->
+        <section id="tab-shop" class="tab-content">
+            <h2 class="text-xl font-bold mb-4 flex items-center gap-2">👟 추천 상품</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- 상품 카드 1 -->
+                <div class="glass p-5 rounded-2xl flex flex-col justify-between hover:border-yellow-400/50 transition">
+                    <div>
+                        <div class="text-5xl mb-4 text-center">👟</div>
+                        <h3 class="font-bold text-lg mb-1">나이키 에어 스니커즈</h3>
+                        <p class="text-xs text-gray-400 mb-4">최상의 쿠셔닝과 트렌디한 디자인의 프리미엄 스니커즈</p>
+                    </div>
+                    <div>
+                        <div class="text-yellow-400 font-extrabold text-xl mb-3">70,000 원</div>
+                        <button onclick="buyProduct('나이키 에어 스니커즈', 70000)" class="w-full bg-yellow-400 hover:bg-yellow-300 text-black font-bold py-2.5 rounded-xl transition">구매하기</button>
+                    </div>
+                </div>
+                <!-- 상품 카드 2 -->
+                <div class="glass p-5 rounded-2xl flex flex-col justify-between hover:border-yellow-400/50 transition">
+                    <div>
+                        <div class="text-5xl mb-4 text-center">🏃</div>
+                        <h3 class="font-bold text-lg mb-1">나이키 줌 런닝화</h3>
+                        <p class="text-xs text-gray-400 mb-4">가벼운 착화감과 신속한 반발력을 자랑하는 러닝 전용 슈즈</p>
+                    </div>
+                    <div>
+                        <div class="text-yellow-400 font-extrabold text-xl mb-3">50,000 원</div>
+                        <button onclick="buyProduct('나이키 줌 런닝화', 50000)" class="w-full bg-yellow-400 hover:bg-yellow-300 text-black font-bold py-2.5 rounded-xl transition">구매하기</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 탭 2: 금액 충전 -->
+        <section id="tab-charge" class="tab-content hidden-tab">
+            <div class="glass p-6 rounded-2xl max-w-xl mx-auto">
+                <h2 class="text-xl font-bold mb-2 flex items-center gap-2">💰 포인트 충전하기</h2>
+                <p class="text-xs text-gray-400 mb-6">원하시는 결제 수단을 선택 후 충전을 진행해 주세요.</p>
+
+                <!-- 결제 수단 선택 버튼 -->
+                <div class="mb-6">
+                    <label class="block text-xs font-semibold text-gray-300 mb-2">결제 수단 선택</label>
+                    <div class="grid grid-cols-3 gap-3">
+                        <button type="button" onclick="selectPayMethod('culture')" id="pm-culture" class="pay-method-btn border border-yellow-400 bg-yellow-400/10 text-yellow-400 font-bold py-3 rounded-xl text-xs sm:text-sm">
+                            🎫 문화상품권
+                        </button>
+                        <button type="button" onclick="selectPayMethod('bank')" id="pm-bank" class="pay-method-btn border border-gray-700 bg-gray-900 text-gray-400 font-bold py-3 rounded-xl text-xs sm:text-sm hover:border-gray-500">
+                            🏦 계좌이체
+                        </button>
+                        <button type="button" onclick="selectPayMethod('kakao')" id="pm-kakao" class="pay-method-btn border border-gray-700 bg-gray-900 text-gray-400 font-bold py-3 rounded-xl text-xs sm:text-sm hover:border-gray-500">
+                            💛 카카오페이
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 문화상품권 입력 폼 -->
+                <form id="cultureForm" onsubmit="handleCultureCharge(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-300 mb-1">충전 금액 선택</label>
+                        <select id="chargeAmount" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-yellow-400">
+                            <option value="5000">5,000 원</option>
+                            <option value="10000" selected>10,000 원</option>
+                            <option value="30000">30,000 원</option>
+                            <option value="50000">50,000 원</option>
+                            <option value="100000">100,000 원</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-300 mb-1">문화상품권 PIN 번호 (16~18자리)</label>
+                        <input type="text" id="pinNumber" placeholder="'-' 제외 입력 (예: 1234567890123456)" required
+                            class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-yellow-400">
+                    </div>
+                    <button type="submit" class="w-full bg-yellow-400 hover:bg-yellow-300 text-black font-bold py-3 rounded-xl transition mt-2">
+                        충전 신청하기 (구매 대기)
+                    </button>
+                </form>
+
+                <div id="otherPayNotice" class="hidden text-center py-8 text-gray-400 text-sm">
+                    현재 선택하신 결제 수단은 점검 중입니다.<br><span class="text-yellow-400 font-bold">'문화상품권'</span> 결제수단을 이용해 주세요.
+                </div>
+            </div>
+        </section>
+
+        <!-- 탭 3: 충전 내역 -->
+        <section id="tab-chargeHistory" class="tab-content hidden-tab">
+            <h2 class="text-xl font-bold mb-4">📋 문화상품권 충전 신청 내역</h2>
+            <div class="glass rounded-2xl p-4 overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead class="text-gray-400 border-b border-gray-800 text-xs uppercase">
+                        <tr>
+                            <th class="py-3 px-4">날짜</th>
+                            <th class="py-3 px-4">수단</th>
+                            <th class="py-3 px-4">신청 금액</th>
+                            <th class="py-3 px-4">PIN 번호</th>
+                            <th class="py-3 px-4">상태</th>
+                        </tr>
+                    </thead>
+                    <tbody id="chargeHistoryList" class="divide-y divide-gray-800">
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 탭 4: 구매 내역 -->
+        <section id="tab-buyHistory" class="tab-content hidden-tab">
+            <h2 class="text-xl font-bold mb-4">📦 상품 구매 내역</h2>
+            <div class="glass rounded-2xl p-4 overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead class="text-gray-400 border-b border-gray-800 text-xs uppercase">
+                        <tr>
+                            <th class="py-3 px-4">날짜</th>
+                            <th class="py-3 px-4">상품명</th>
+                            <th class="py-3 px-4">결제 금액</th>
+                        </tr>
+                    </thead>
+                    <tbody id="buyHistoryList" class="divide-y divide-gray-800">
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 관리자 인증 & 대기목록 모달 -->
+    <div id="adminModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center hidden z-50 p-4">
+        <div class="glass bg-gray-900 p-6 rounded-2xl max-w-2xl w-full border border-gray-700">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-red-400 flex items-center gap-2">🔐 관리자 메뉴</h3>
+                <button onclick="closeAdminModal()" class="text-gray-400 hover:text-white">✕</button>
+            </div>
+
+            <div id="adminAuthBox" class="space-y-4">
+                <p class="text-xs text-gray-400">관리자 비밀번호를 입력해주세요.</p>
+                <input type="password" id="adminPassword" placeholder="비밀번호 입력" class="w-full bg-black border border-gray-700 rounded-xl px-4 py-2.5 text-sm">
+                <button onclick="verifyAdmin()" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-2.5 rounded-xl transition">인증하기</button>
+            </div>
+
+            <div id="adminContentBox" class="hidden space-y-4">
+                <div class="flex justify-between items-center border-b border-gray-800 pb-2">
+                    <span class="text-sm font-semibold">문화상품권 충전 신청/대기 목록</span>
+                    <span class="text-xs text-gray-400">알림 메일: seojinkim2031@his.sc.kr</span>
+                </div>
+                <div class="max-h-80 overflow-y-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="text-gray-400 border-b border-gray-800">
+                            <tr>
+                                <th class="p-2">신청자</th>
+                                <th class="p-2">금액</th>
+                                <th class="p-2">PIN 번호</th>
+                                <th class="p-2">상태</th>
+                                <th class="p-2 text-center">승인 관리</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminPendingList" class="divide-y divide-gray-800">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 로그인 / 회원가입 모달 -->
+    <div id="authModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center hidden z-50 p-4">
+        <div class="glass bg-gray-900 p-6 rounded-2xl max-w-sm w-full border border-gray-700">
+            <div class="flex border-b border-gray-800 mb-4">
+                <button onclick="switchAuthMode('login')" id="tabLogin" class="w-1/2 py-2 text-center font-bold text-yellow-400 border-b-2 border-yellow-400">로그인</button>
+                <button onclick="switchAuthMode('register')" id="tabRegister" class="w-1/2 py-2 text-center font-bold text-gray-500 border-b-2 border-transparent">회원가입</button>
+            </div>
+
+            <form onsubmit="handleAuthSubmit(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">아이디</label>
+                    <input type="text" id="authUsername" placeholder="아이디 입력" required class="w-full bg-black border border-gray-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-yellow-400">
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">비밀번호</label>
+                    <input type="password" id="authPassword" placeholder="비밀번호 입력" required class="w-full bg-black border border-gray-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-yellow-400">
+                </div>
+                <button type="submit" id="authSubmitBtn" class="w-full bg-yellow-400 hover:bg-yellow-300 text-black font-bold py-2.5 rounded-xl transition mt-2">
+                    로그인
+                </button>
+            </form>
+            <button onclick="closeAuthModal()" class="w-full mt-3 text-xs text-gray-400 hover:text-white">닫기</button>
+        </div>
+    </div>
+
+    <script>
+        // EmailJS 설정 변수
+        const EMAILJS_SERVICE_ID = "YOUR_SERVICE_ID";
+        const EMAILJS_TEMPLATE_ID = "YOUR_TEMPLATE_ID";
+        const EMAILJS_PUBLIC_KEY = "YOUR_PUBLIC_KEY";
+
+        if (EMAILJS_PUBLIC_KEY !== "YOUR_PUBLIC_KEY") {
+            emailjs.init(EMAILJS_PUBLIC_KEY);
+        }
+
+        let authMode = 'login';
+        
+        // 데이터 로드 함수 (공통 LocalStorage 읽기)
+        function getSharedData() {
+            return {
+                users: JSON.parse(localStorage.getItem('nike_users')) || {},
+                charges: JSON.parse(localStorage.getItem('nike_charges')) || [],
+                purchases: JSON.parse(localStorage.getItem('nike_purchases')) || []
+            };
+        }
+
+        // 현재 탭 전용 로그인 아이디 (탭/창 독립)
+        let currentUser = sessionStorage.getItem('nike_tab_currentUser') || null;
+
+        window.onload = function() {
+            updateUI();
+            
+            // 다른 탭에서 데이터 변경 시(예: 충전 승인) 현재 탭 화면도 자동 동기화
+            window.addEventListener('storage', function(e) {
+                if (['nike_users', 'nike_charges', 'nike_purchases'].includes(e.key)) {
+                    updateUI();
+                }
+            });
+        };
+
+        // 데이터 저장 함수
+        function saveSharedData(users, charges, purchases) {
+            if (users) localStorage.setItem('nike_users', JSON.stringify(users));
+            if (charges) localStorage.setItem('nike_charges', JSON.stringify(charges));
+            if (purchases) localStorage.setItem('nike_purchases', JSON.stringify(purchases));
+        }
+
+        // 현재 탭 로그인 상태 저장
+        function setTabUser(username) {
+            currentUser = username;
+            if (username) {
+                sessionStorage.setItem('nike_tab_currentUser', username);
+            } else {
+                sessionStorage.removeItem('nike_tab_currentUser');
+            }
+        }
+
+        // UI 갱신
+        function updateUI() {
+            const { users } = getSharedData();
+            const authBtn = document.getElementById('authBtn');
+            const greeting = document.getElementById('userGreeting');
+            const dashUser = document.getElementById('dashUsername');
+            const userBalance = document.getElementById('userBalance');
+
+            if (currentUser && users[currentUser]) {
+                authBtn.innerText = '로그아웃';
+                greeting.innerText = `${currentUser}님`;
+                greeting.classList.remove('hidden');
+                dashUser.innerText = currentUser;
+                userBalance.innerText = (users[currentUser].balance || 0).toLocaleString();
+            } else {
+                authBtn.innerText = '로그인 / 회원가입';
+                greeting.classList.add('hidden');
+                dashUser.innerText = '로그인이 필요합니다';
+                userBalance.innerText = '0';
+            }
+
+            renderHistories();
+            
+            // 관리자 창이 열려있는 경우 목록 동기화
+            if (!document.getElementById('adminContentBox').classList.contains('hidden')) {
+                renderAdminList();
+            }
+        }
+
+        function handleAuthAction() {
+            if (currentUser) {
+                setTabUser(null);
+                alert('로그아웃 되었습니다.');
+                updateUI();
+            } else {
+                switchAuthMode('login');
+                document.getElementById('authModal').classList.remove('hidden');
+            }
+        }
+
+        function closeAuthModal() {
+            document.getElementById('authModal').classList.add('hidden');
+        }
+
+        function switchAuthMode(mode) {
+            authMode = mode;
+            const tabLogin = document.getElementById('tabLogin');
+            const tabRegister = document.getElementById('tabRegister');
+            const submitBtn = document.getElementById('authSubmitBtn');
+
+            if (mode === 'login') {
+                tabLogin.className = "w-1/2 py-2 text-center font-bold text-yellow-400 border-b-2 border-yellow-400";
+                tabRegister.className = "w-1/2 py-2 text-center font-bold text-gray-500 border-b-2 border-transparent";
+                submitBtn.innerText = "로그인";
+            } else {
+                tabRegister.className = "w-1/2 py-2 text-center font-bold text-yellow-400 border-b-2 border-yellow-400";
+                tabLogin.className = "w-1/2 py-2 text-center font-bold text-gray-500 border-b-2 border-transparent";
+                submitBtn.innerText = "회원가입 완료";
+            }
+        }
+
+        function handleAuthSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('authUsername').value.trim();
+            const pw = document.getElementById('authPassword').value.trim();
+            const { users } = getSharedData();
+
+            if (!id || !pw) {
+                alert('아이디와 비밀번호를 모두 입력해 주세요.');
+                return;
+            }
+
+            if (authMode === 'register') {
+                if (users[id]) {
+                    alert('이미 존재하는 아이디입니다.');
+                    return;
+                }
+                users[id] = { password: pw, balance: 0 };
+                saveSharedData(users, null, null);
+                setTabUser(id);
+                alert(`🎉 회원가입이 완료되었습니다! 환영합니다, ${id}님.`);
+            } else {
+                if (!users[id] || users[id].password !== pw) {
+                    alert('아이디 또는 비밀번호가 일치하지 않습니다.');
+                    return;
+                }
+                setTabUser(id);
+                alert(`로그인 되었습니다. 반가워요, ${id}님!`);
+            }
+
+            document.getElementById('authUsername').value = '';
+            document.getElementById('authPassword').value = '';
+            closeAuthModal();
+            updateUI();
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden-tab'));
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden-tab');
+        }
+
+        function selectPayMethod(method) {
+            document.querySelectorAll('.pay-method-btn').forEach(btn => {
+                btn.className = "pay-method-btn border border-gray-700 bg-gray-900 text-gray-400 font-bold py-3 rounded-xl text-xs sm:text-sm hover:border-gray-500";
+            });
+
+            const activeBtn = document.getElementById(`pm-${method}`);
+            activeBtn.className = "pay-method-btn border border-yellow-400 bg-yellow-400/10 text-yellow-400 font-bold py-3 rounded-xl text-xs sm:text-sm";
+
+            if (method === 'culture') {
+                document.getElementById('cultureForm').classList.remove('hidden');
+                document.getElementById('otherPayNotice').classList.add('hidden');
+            } else {
+                document.getElementById('cultureForm').classList.add('hidden');
+                document.getElementById('otherPayNotice').classList.remove('hidden');
+            }
+        }
+
+        function handleCultureCharge(e) {
+            e.preventDefault();
+            if (!currentUser) {
+                alert('로그인 후 이용 가능합니다.');
+                handleAuthAction();
+                return;
+            }
+
+            const amount = parseInt(document.getElementById('chargeAmount').value);
+            const pin = document.getElementById('pinNumber').value.trim();
+
+            if (pin.length < 12) {
+                alert('올바른 문화상품권 PIN 번호를 입력해주세요.');
+                return;
+            }
+
+            const { charges } = getSharedData();
+            const chargeData = {
+                id: Date.now(),
+                username: currentUser,
+                method: '문화상품권',
+                amount: amount,
+                pin: pin,
+                status: '구매 대기',
+                date: new Date().toLocaleString()
+            };
+
+            charges.push(chargeData);
+            saveSharedData(null, charges, null);
+
+            sendEmailNotification(chargeData);
+
+            alert('문화상품권 충전 신청이 완료되었습니다! (상태: 구매 대기)\n관리자 승인 후 잔액이 지급됩니다.');
+            document.getElementById('pinNumber').value = '';
+            switchTab('chargeHistory');
+            updateUI();
+        }
+
+        function sendEmailNotification(data) {
+            if (EMAILJS_PUBLIC_KEY === "YOUR_PUBLIC_KEY") return;
+
+            const templateParams = {
+                to_email: 'seojinkim2031@his.sc.kr',
+                user_name: data.username,
+                amount: data.amount,
+                pin_number: data.pin,
+                request_date: data.date
+            };
+
+            emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
+        }
+
+        function renderHistories() {
+            const { charges, purchases } = getSharedData();
+
+            const chargeBody = document.getElementById('chargeHistoryList');
+            const userCharges = charges.filter(c => c.username === currentUser);
+            
+            if (userCharges.length === 0) {
+                chargeBody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-500">충전 신청 내역이 없습니다.</td></tr>`;
+            } else {
+                chargeBody.innerHTML = userCharges.map(c => `
+                    <tr>
+                        <td class="p-3 text-gray-400">${c.date}</td>
+                        <td class="p-3 text-xs text-yellow-400 font-bold">${c.method}</td>
+                        <td class="p-3 font-bold">${c.amount.toLocaleString()}원</td>
+                        <td class="p-3 font-mono text-gray-300">${c.pin}</td>
+                        <td class="p-3">
+                            <span class="px-2 py-1 rounded text-xs ${c.status === '승인완료' ? 'bg-green-900/60 text-green-300 border border-green-700' : 'bg-yellow-900/60 text-yellow-300 border border-yellow-700'}">
+                                ${c.status}
+                            </span>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            const buyBody = document.getElementById('buyHistoryList');
+            const userBuys = purchases.filter(p => p.username === currentUser);
+
+            if (userBuys.length === 0) {
+                buyBody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-gray-500">구매 내역이 없습니다.</td></tr>`;
+            } else {
+                buyBody.innerHTML = userBuys.map(p => `
+                    <tr>
+                        <td class="p-3 text-gray-400">${p.date}</td>
+                        <td class="p-3 font-semibold">${p.productName}</td>
+                        <td class="p-3 text-yellow-400 font-bold">${p.price.toLocaleString()}원</td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        function buyProduct(productName, price) {
+            if (!currentUser) {
+                alert('로그인이 필요합니다.');
+                handleAuthAction();
+                return;
+            }
+
+            const { users, purchases } = getSharedData();
+
+            if (!users[currentUser] || users[currentUser].balance < price) {
+                alert('잔액이 부족합니다! 금액 충전 후 이용해 주세요.');
+                switchTab('charge');
+                return;
+            }
+
+            users[currentUser].balance -= price;
+            purchases.push({
+                username: currentUser,
+                productName: productName,
+                price: price,
+                date: new Date().toLocaleString()
+            });
+
+            saveSharedData(users, null, purchases);
+
+            alert(`🎉 [${productName}] 구매가 완료되었습니다!`);
+            updateUI();
+        }
+
+        // --- 관리자 기능 ---
+        function openAdminModal() {
+            document.getElementById('adminModal').classList.remove('hidden');
+        }
+
+        function closeAdminModal() {
+            document.getElementById('adminModal').classList.add('hidden');
+        }
+
+        function verifyAdmin() {
+            const pw = document.getElementById('adminPassword').value;
+            if (pw === '77924159') {
+                document.getElementById('adminAuthBox').classList.add('hidden');
+                document.getElementById('adminContentBox').classList.remove('hidden');
+                renderAdminList();
+            } else {
+                alert('비밀번호가 올바르지 않습니다.');
+            }
+        }
+
+        function renderAdminList() {
+            const { charges } = getSharedData();
+            const adminBody = document.getElementById('adminPendingList');
+            if (charges.length === 0) {
+                adminBody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-500">신청된 내역이 없습니다.</td></tr>`;
+                return;
+            }
+
+            adminBody.innerHTML = charges.map(c => `
+                <tr>
+                    <td class="p-2 font-bold">${c.username}</td>
+                    <td class="p-2 text-yellow-400">${c.amount.toLocaleString()}원</td>
+                    <td class="p-2 font-mono text-gray-300">${c.pin}</td>
+                    <td class="p-2">${c.status}</td>
+                    <td class="p-2 text-center">
+                        ${c.status === '구매 대기' ? `
+                            <button onclick="approveCharge(${c.id})" class="bg-green-600 hover:bg-green-500 text-white px-2 py-1 rounded text-xs font-bold transition">
+                                승인 (충전 완료)
+                            </button>
+                        ` : '<span class="text-gray-500 text-xs">완료됨</span>'}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function approveCharge(chargeId) {
+            const { users, charges } = getSharedData();
+            const charge = charges.find(c => c.id === chargeId);
+            if (!charge) return;
+
+            charge.status = '승인완료';
+            
+            if (!users[charge.username]) {
+                users[charge.username] = { password: '', balance: 0 };
+            }
+            users[charge.username].balance = (users[charge.username].balance || 0) + charge.amount;
+
+            saveSharedData(users, charges, null);
+
+            alert(`[${charge.username}] 님에게 ${charge.amount.toLocaleString()}원 충전이 승인 완료되었습니다.`);
+            updateUI();
+        }
+    </script>
+</body>
+</html>
